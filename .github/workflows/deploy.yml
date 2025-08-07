@@ -1,15 +1,14 @@
-name: Deploy to Snowflake with Schemachange
+name: Deploy to Snowflake
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
 
 jobs:
-  deploy-dev:
-    name: Deploy Dev Environment
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -17,73 +16,20 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.11'
 
-      - name: Install schemachange
-        run: pip install schemachange
-
-      - name: Run schemachange for Dev
+      - name: Install dependencies
         run: |
-          schemachange --verbose -f envs/dev -c schemachange-config/config-dev.yml
-        env:
-          SNOWFLAKE_ACCOUNT: dpwoyuf-mp48097
-          SNOWFLAKE_USERNAME: PRANKA
-          SNOWFLAKE_PASSWORD: Abcd@1234
-          SNOWFLAKE_ROLE: ACCOUNTADMIN
-          SNOWFLAKE_WAREHOUSE: COMPUTE_WH
-          SNOWFLAKE_DATABASE_DEV: DEV_DB
-          SNOWFLAKE_SCHEMA_DEV: PUBLIC
+          pip install -r requirements.txt
 
-  deploy-test:
-    name: Deploy Test Environment
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install schemachange
-        run: pip install schemachange
-
-      - name: Run schemachange for Test
+      - name: Deploy to DEV
         run: |
-          schemachange --verbose -f envs/test -c schemachange-config/config-test.yml
-        env:
-          SNOWFLAKE_ACCOUNT: dpwoyuf-mp48097
-          SNOWFLAKE_USERNAME: PRANKA
-          SNOWFLAKE_PASSWORD: Abcd@1234
-          SNOWFLAKE_ROLE: ACCOUNTADMIN
-          SNOWFLAKE_WAREHOUSE: COMPUTE_WH
-          SNOWFLAKE_DATABASE_TEST: TEST_DB
-          SNOWFLAKE_SCHEMA_TEST: PUBLIC
+          snowflake-cli deploy --config-path configs/config-dev.yml
 
-  deploy-prod:
-    name: Deploy Prod Environment
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-
-      - name: Install schemachange
-        run: pip install schemachange
-
-      - name: Run schemachange for Prod
+      - name: Deploy to TEST
         run: |
-          schemachange --verbose -f envs/prod -c schemachange-config/config-prod.yml
-        env:
-          SNOWFLAKE_ACCOUNT: dpwoyuf-mp48097
-          SNOWFLAKE_USERNAME: PRANKA
-          SNOWFLAKE_PASSWORD: Abcd@1234
-          SNOWFLAKE_ROLE: ACCOUNTADMIN
-          SNOWFLAKE_WAREHOUSE: COMPUTE_WH
-          SNOWFLAKE_DATABASE_PROD: PROD_DB
-          SNOWFLAKE_SCHEMA_PROD: PUBLIC
+          snowflake-cli deploy --config-path configs/config-test.yml
+
+      - name: Deploy to PROD
+        run: |
+          snowflake-cli deploy --config-path configs/config-prod.yml

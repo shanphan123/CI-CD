@@ -1,0 +1,8 @@
+account: "dpwoyuf-mp48097"
+user: "PRANKA"
+password: "Abcd@1234"
+role: "ACCOUNTADMIN"
+warehouse: "COMPUTE_WH"
+database: "DEV_DB"
+schema: "PUBLIC"
+root-folder: envs/dev
